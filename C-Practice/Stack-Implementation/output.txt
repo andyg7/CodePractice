@@ -1,0 +1,13 @@
+Pushed:  1
+Pushed:  29
+Pushed:  5
+Pushed:  34
+Stack size:  4
+34 29 Pushed:  1
+Pushed:  2
+Pushed:  3
+Pushed:  4
+Pushed:  5
+Pushed:  6
+Stack size:  6
+6 4 2 
