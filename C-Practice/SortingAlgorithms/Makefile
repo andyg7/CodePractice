@@ -1,4 +1,6 @@
-CC=gcc
+CC = gcc
+INCLUDES =
+CFLAGS = -g -Wall
 
 main: Mergesort.o
 	$(CC) -o main Mergesort.o
