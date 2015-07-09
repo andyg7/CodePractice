@@ -31,15 +31,20 @@ public class Main {
 			}
 			double minimumDistance = getDistance(points,0);
 			if(minimumDistance < 10000) {
-				int multipliedDis = (int)(minimumDistance * 10000);
-				minimumDistance = (double) multipliedDis / 10000;
+				int multipliedDis = (int)(minimumDistance * 100000);
+				//System.out.println(multipliedDis);
+				if((multipliedDis % 10) >= 5) {
+					multipliedDis++;
+					//System.out.println("fogggg");
+				}
+				minimumDistance = (double) multipliedDis / 100000;
 				if(minimumDistance - multipliedDis == 0.0) {
 					System.out.print(multipliedDis);
-				System.out.println("heee");
+			//	System.out.println("heee");
 				} else {
-					System.out.print(minimumDistance);
-					//				DecimalFormat df = new DecimalFormat("#0.0000");
-					//				System.out.print(df.format(minimumDistance));
+					//System.out.print(minimumDistance);
+									DecimalFormat df = new DecimalFormat("#0.0000");
+									System.out.print(df.format(minimumDistance));
 				}	
 			}
 			else {
