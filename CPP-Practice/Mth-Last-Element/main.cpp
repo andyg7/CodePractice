@@ -9,8 +9,9 @@ int main(int argc, char *argv[]) {
 	while(getline(stream,line)) {
 		if(firstRun == 0) {
 			cout << endl;
+		} else {
+			firstRun = 0;
 		}
-		firstRun = 0;
 		int stringLength = line.size();
 		if(line[stringLength-1 == ' ']){
 			int mth = int(line[stringLength - 1]) - '0';

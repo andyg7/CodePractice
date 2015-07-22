@@ -19,24 +19,32 @@ public class Main {
 				String tempS = findSequence(line);
 				tempS = tempS.trim();
 				if(tempS == "") {
-					lastLineEmpty = true;
+					System.out.print(tempS);
+					//lastLineEmpty = true;
 				} else {
 					System.out.print(tempS);
+					//System.out.println(tempS.length());
 				}
 			}
 		}
 	}
 
 	public static String findSequence(String s) {
+		if(s.charAt(0) == ';') {
+			return "";
+		}
+		if(s.charAt(s.length()-1) == ';') {
+			return "";
+		}
+		String[] splitStrings = s.split(";");
 		String firstWord, secondWord;
 		int colonIndex = s.indexOf(';');
-		firstWord = s.substring(0,colonIndex);
+		firstWord = splitStrings[0];
 		//firstWord = firstWord.toUpperCase();
-		secondWord = s.substring(colonIndex + 1, s.length());
+		secondWord = splitStrings[1];
 		//secondWord = secondWord.toUpperCase();
 		String sequence = "";
 		int sequenceLength = -1;
-
 		int firstWordLength = firstWord.length();
 		int secondWordLength = secondWord.length();
 		int firstCounter = 0;

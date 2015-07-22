@@ -23,6 +23,10 @@ public class Main {
 		System.out.println("\nElements after sorting ");        
 		heap.printHeap();
 
+		System.out.println(heap.getPrivateNum);
+		heap.setPrivateNum(5);
+		System.out.println(heap.getPrivateNum);
+
 	}
 
 

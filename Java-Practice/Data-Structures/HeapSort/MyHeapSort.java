@@ -4,12 +4,20 @@ public class MyHeapSort {
 
 	private int highestIndex;
 	int[] heap;
+	private int privNum = 10;
 
-	
 	/*
 		Constructor takes an array of ints to sort and automatically
 		calls sort method
 	*/
+
+	public void setPrivateNum(int i) {
+		privNum = i;
+	}
+
+	public int getPrivateNum(int i) {
+		return privateNum;
+	}
 
 	public MyHeapSort(int[] arr) {
 		heap = arr;

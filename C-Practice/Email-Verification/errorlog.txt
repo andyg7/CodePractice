@@ -1,0 +1,16 @@
+main.c:21:10: error: expected ';' after expression
+                        printf
+                              ^
+                              ;
+main.c:21:4: warning: expression result unused [-Wunused-value]
+                        printf
+                        ^~~~~~
+main.c:27:6: error: use of undeclared identifier 'valifEmail'; did you mean 'validEmail'?
+                if(valifEmail == true) {
+                   ^~~~~~~~~~
+                   validEmail
+main.c:13:8: note: 'validEmail' declared here
+                bool validEmail = true;
+                     ^
+1 warning and 2 errors generated.
+make: *** [main.o] Error 1

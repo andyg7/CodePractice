@@ -4,6 +4,7 @@ public class Main {
 
 	private static ArrayList<Integer> inside = new ArrayList<Integer>();
 	private static ArrayList<Integer> leftHouse = new ArrayList<Integer>();
+	private static ArrayList<String> events; 
 
 	public static void main (String[] args) throws IOException {
 		File file = new File(args[0]);
@@ -18,158 +19,284 @@ public class Main {
 				firstRun = false;
 			}
 			// Process line of input Here
+			events = new ArrayList<String>();
 			int passes = getIntFromString(line);
-			//System.out.println("Passes: " + passes);
-			//System.out.println("Start index: " + getStartIndex(line));	
 			int startIndex = getStartIndex(line);
 			String[] input = makeArray(line, startIndex);	
-			/*System.out.println(input.length);
-			  System.out.println(input[0]);
-			  System.out.println(input[1]);
-			  System.out.println(input[2]);*/
-			determineCrime(input);	
+			String output =	determineCrime(input);	
+			System.out.print(output);
 		}
 	}
 
+	public static String determineCrime(String[] s) {
 
-	public static String findPasses(String[] s) {
-
-		for(int i = 0; i < s.length ; i++) {
-			String pass = s[i];
-			if(pass.substring(0,1).equals("E")) {
-				int idToAdd = Integer.parseInt(pass.substring(1,pass.length));
-			} else {
-
-			}	
-		}
-
-		return "s";
-	}
-
-	public static boolean validEntry(int n) {
-		if(inside.contains(n)) {
-			if(leftHouse.contains(n)) {
-				leftHouse.remove(n);
-				inside.add(n);
-				return true;
-			} else if(leftHouse.contains(0)) {
-				leftHouse.remove(0);
-				inside.add(n);
-				return true;
-			}
-			return false;
-		} else if(leftHouse.contains(n)) {
-			leftHouse.remove(n);
-			inside.add(n);
-			return true;
-		} else {
-			inside.add(n);
-			return true;
-		}
-	}
-
-	public static boolean validExit(int n) {
-		if(leftHouse.contains(n)) {
-			if(inside.contains(0)) {
-				inside.remove(0);
-				leftHouse.add(n);
-				return true;
-			} 
-			if(inside.contains(n)) {
-				inside.remove(n);
-				leftHouse.add(n);
-				return true;
-			}
-			return false;
-		}
-		if(inside.contains(n)) {
-			inside.remove(n);
-			leftHouse.add(n);
-			return true;
-		}
-		leftHouse.add(n);
-		return true;
-	}
-
-	public static void determineCrime(String[] s) {
+		boolean validSeq = true;
 
 		ArrayList<String> list = new ArrayList<String>();
 		for(int i = 0; i < s.length; i++) {
 			list.add(s[i]);
+			//System.out.println(s[i]);
+		}
+		for(int i = 0; i < list.size(); i++) {
+			String elem = list.get(i);
+			int elemLen = elem.length();
+			String direction = elem.substring(0,1);
+			String id = elem.substring(1, elemLen);
+			String oppString = opposite(elem);
+			//System.out.println(oppString);
+			//System.out.println("Adding " + elem);
+			boolean tempBool = addId(elem);
+			if(tempBool == false) {
+				validSeq = false;
+			}
+		}
+		printEvents();
+		if(validSeq == false) {
+			String returnedString = "CRIME TIME";
+			//System.out.println("CRIME TIME");
+			return returnedString;
+		}
+		int criminalsInHouse = minimizeEvents();
+		String crimes = Integer.toString(criminalsInHouse);
+		return crimes;
+	}
+
+	private static int minimizeEvents() {
+
+		int len = events.size();
+		int firstCounter = entersNotZeroLeft();
+		int zeroCounter = entersLeft() - firstCounter;
+		//System.out.println("enters left " + firstCounter);
+		int indexReached = len - 1;
+
+		while(firstCounter > 0) {
+			for(int i = indexReached; i>= 0; i--) {
+				String elem = events.get(i);
+				String dir = elem.substring(0,1);
+				len = events.size();
+				String id = elem.substring(1, elem.length());
+				if(dir.equals("E") && !id.equals("0")) {
+					//System.out.println("trying to rid " + elem);
+					len = events.size();
+					firstCounter--;
+					String opp = opposite(elem);
+					String oppDir = oppDirection(elem);
+					String oppMask = oppDirection(elem);
+					oppMask+="0";
+					boolean foundExact = false;
+					if(id.equals("0")) {
+						for(int a = i + 1; a < len; a++) {
+							String tempString = events.get(a);
+							int tempLen = tempString.length();
+							String tempDir = tempString.substring(0,1);
+							String tempId = tempString.substring(1,
+							tempLen);
+							if(tempDir.equals(oppDir) &&
+								!tempId.equals("0")) {
+								events.remove(a);
+								events.remove(i);
+								a = len;
+								foundExact = true;
+							}
+						}
+					} else {
+						for(int a = i + 1; a < len; a++) {
+							if(events.get(a).equals(opp)) {
+								events.remove(a);
+								events.remove(i);
+								a = len;
+								foundExact = true;
+							}
+						}
+					}
+
+					if(foundExact == false) {
+
+						for(int a = i + 1; a  < len; a++) {
+							if(events.get(a).equals(oppMask)) {
+								events.remove(a);
+								events.remove(i);
+								a = len;
+
+							}
+						}
+					}
+					len = events.size();
+					//indexReached = i - 1;
+					//i = -1;
+				}
+			}
+		
 		}
 
-		for(int i = 0;i < list.size();i++) {
-			String ts = list.get(i);
-			if(ts.substring(0,1).equals("E") && (!ts.substring(1,ts.length()).equals("0"))) {
-				String ss = "L";
-				ss+=ts.substring(1,ts.length());
-				//System.out.println("SS" + ss);
-				for(int a = i;a < list.size();a++) {
-					if(list.get(a).equals(ss)) {
-						list.remove(a);
-						list.remove(i);
-						a = list.size();
-						i--;	
+		while(zeroCounter > 0) {
+			len = events.size();
+			indexReached = len - 1;
+			for(int i = indexReached; i >= 0; i--) {
+				String elem = events.get(i);
+				String dir = elem.substring(0,1);
+				len = events.size();
+				String id = elem.substring(1, elem.length());
+				if(dir.equals("E") && id.equals("0")) {
+					//System.out.println("trying to rid " + elem);
+					len = events.size();
+					zeroCounter--;
+					String opp = opposite(elem);
+					String oppDir = oppDirection(elem);
+					String oppMask = oppDirection(elem);
+					oppMask+="0";
+					boolean foundExact = false;
+					for(int a = i + 1; a < len; a++) {
+						String tempString = events.get(a);
+						String tempDir = tempString.substring(0,1);
+						if(tempDir.equals("L")) {
+							events.remove(a);
+							events.remove(i);
+							a = len;
+							foundExact = true;
+						}
 					}
 				}
 			}
 		}
-		for(int i = 0; i < list.size();i++) {
-			String ts = list.get(i);
-			//System.out.println("ts"+ts);
-			if(ts.equals("E0")) {
-				for(int a = i;a < list.size();a++) {
-					String ss = list.get(a);
-					if(ss.substring(0,1).equals("L")) {
-						list.remove(a);
-						list.remove(i);
-						a = list.size();
-						i--;	
-					}
-				}
-			}
-		}	
-		for(int i = 0; i < list.size();i++) {
-			String ts = list.get(i);
-			if(ts.equals("L0")) {
-				for(int a = 0;a < i;a++) {
-					if(list.get(a).substring(0,1).equals("E")) {
-						list.remove(i);
-						list.remove(a);
-						a = i;
-						i--;	
-					}
-				}
-			}
 
-		}
-		boolean doublePasses = false;
-		for(int i = 0; i < list.size();i++) {
-			String ts = list.get(i);
-			if(!(ts.substring(1,ts.length()).equals("0"))){
-				for(int a = i + 1; a < list.size();a++) {
-					if(list.get(a).equals(ts)) {
-						doublePasses = true;
-						a = list.size();
-						i = list.size();
-					}	
-				}
-			}
-		}
-		//System.out.print(doublePasses);
-		if(doublePasses == true) {
-			System.out.print("CRIME TIME");
+		int entersLeft = entersLeft();
+		//System.out.println("after minimizing we have enters left " + entersLeft);
+		return entersLeft;
+	}
+
+	private static String opposite(String s) {
+		String direction = s.substring(0,1);
+		int len = s.length();
+		String id = s.substring(1, len);
+		if(direction.equals("E")) {
+			String ts = "L";
+			ts+=id;
+			return ts;
 		} else {
-			int counter = 0;
-			for(int b = 0; b < list.size(); b++) {
-				if(list.get(b).substring(0,1).equals("E")) {
-					counter++;
+			String ts = "E";
+			ts+=id;
+			return ts;
+		}
+	}
+
+	private static void printEvents() {
+		//System.out.println("Printing events list");
+		for(int i = 0; i < events.size(); i++) {
+			//System.out.print(events.get(i) + " ");
+		}
+		//System.out.println();
+	}
+
+	private static int entersNotZeroLeft() {
+		
+		int counter = 0;
+		int len = events.size();
+		for(int i = 0; i < len; i++) {
+			String event = events.get(i);
+			int stringLen = event.length();
+			String dir = event.substring(0,1);
+			String id = event.substring(1, stringLen);
+			if(dir.equals("E") && !id.equals("0")) {
+				counter++;
+			}
+		}
+		return counter;
+
+
+	}
+
+	private static int entersLeft() {
+		int counter = 0;
+		int len = events.size();
+		for(int i = 0; i < len; i++) {
+			String event = events.get(i);
+			String dir = event.substring(0,1);
+			if(dir.equals("E")) {
+				counter++;
+			}
+		}
+		return counter;
+	}
+
+	private static boolean addId(String s) {
+
+		//System.out.println("Adding " + s);
+		String oppId = opposite(s);
+		int numEvents = events.size();
+		int len = s.length();
+		String direction = s.substring(0,1);
+		String id = s.substring(1,len);
+		if(id.equals("0")) {
+			events.add(s);
+			//System.out.println("actually adding " + s);
+			return true;
+		}
+
+		for(int i = numEvents - 1; i >= 0; i--) {
+			int index = i;
+			if(events.get(index).equals(oppId)) {
+				//events.remove(index);
+				//System.out.println("adding " + s);
+				events.add(s);
+				return true;
+			}
+			if(events.get(index).equals(s)) {
+				boolean foundMask = false;
+
+				if(direction.equals("E")) {
+					for(int a = index; a < numEvents; a++) {
+						String mask = oppDirection(s);
+						mask+="0";
+						//System.out.println("looking for " + mask);
+						if(events.get(a).equals(mask)) {
+							events.remove(a);
+							events.add(a, oppId);
+							//events.remove(index);
+							events.add(s);
+							//System.out.println("adding " + s);
+							foundMask = true;
+							a = index - 1;
+						}
+					}
+				} else {
+					for(int a = numEvents - 1; a >= index; a--) {
+						String mask = oppDirection(s);
+						mask+="0";
+						//System.out.println("looking for " + mask);
+						if(events.get(a).equals(mask)) {
+							events.remove(a);
+							events.add(a, oppId);
+							//events.remove(index);
+							events.add(s);
+							//System.out.println("adding " + s);
+							foundMask = true;
+							a = index - 1;
+						}
+					}
+				}
+
+				
+				if(foundMask == false) {
+					return false;
+				} else {
+					return true;
 				}
 			}
-			System.out.print(counter);
 		}
-		for(int i = 0; i < list.size();i++) {
-			//System.out.print(list.get(i));
+		events.add(s);
+		//System.out.println("adding " + s);
+		return true;
+	}
+
+	private static String oppDirection(String s) {
+		String dir = s.substring(0,1);
+		if(dir.equals("E")) {
+			String t = "L";
+			return t;
+		} else {
+			String t = "E";
+			return t;
 		}
 	}
 
@@ -201,5 +328,6 @@ public class Main {
 		}
 		return tmpArry;
 	}
+
 }
 
