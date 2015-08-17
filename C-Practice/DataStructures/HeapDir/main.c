@@ -14,7 +14,12 @@ int main(int argc, char **argv) {
 	addHeapNode(&root, 109);	
 	addHeapNode(&root, 5);	
 	addHeapNode(&root, 36);	
+	addHeapNode(&root, 23);	
+	addHeapNode(&root, 598);	
+	addHeapNode(&root, 2);	
+	addHeapNode(&root, 2);	
 	//printf("%s %d\n", "size of heap", sizeOfHeap(&root));
 	bfs(&root);
+	freeHeap(&root);
 	return 0;
 }

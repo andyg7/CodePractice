@@ -5,6 +5,7 @@
 #include "MyQueue.h"
 
 static struct HeapNode **nextPosition(struct HeapNode **element);
+static int getRow(int n);
 
 static struct HeapNode ** nextPosition(struct HeapNode **element) {
 
@@ -19,7 +20,7 @@ static struct HeapNode ** nextPosition(struct HeapNode **element) {
 	int sizeOfIterator = sizeof(iterator);
 	insert(&queue, &(iterator), sizeOfIterator);
 	//printf("%s %d\n","len of q", lengthOfQueue(&queue));
-	
+
 	while(foundPos == false) {
 		iterator = *(struct HeapNode ***)frontElement(&queue);	
 		if((*iterator)->leftChild == NULL) {
@@ -42,7 +43,7 @@ static struct HeapNode ** nextPosition(struct HeapNode **element) {
 	} 
 
 	freeQueue(&queue);
-		//printf("%s %d\n", "printing queue len", lengthOfQueue(&queue));
+	//printf("%s %d\n", "printing queue len", lengthOfQueue(&queue));
 	//printf("%s %d\n", "returning ", (*nodeToReturn)->data); 
 	return nodeToReturn;
 }
@@ -65,7 +66,7 @@ void addHeapNode(struct HeapNode **element, int n) {
 		struct HeapNode **prtNode = nextPosition(element);
 		if((*prtNode) == NULL) {
 		}
-		 if((*prtNode)->leftChild == NULL) {
+		if((*prtNode)->leftChild == NULL) {
 			nodeToAdd->parent = *prtNode;
 			(*prtNode)->leftChild = nodeToAdd;
 			//printf("%s\n","okok");
@@ -94,18 +95,17 @@ int sizeOfHeap(struct HeapNode **element, int n) {
 
 void bfs(struct HeapNode **element) {
 	int heapSize = sizeOfHeap(element, 0);
+	int nodeCounter = 0;
+	int currentRow = 0;
 
 	if(heapSize == 0) {
 		printf("%s\n", "heap is empty");
 	} else {
-		printf("%s %d\n", "size of heap", heapSize);
 		struct HeapNode **iterator = element;
 		struct node *queue = NULL;
 		insert(&queue, &iterator, sizeof(iterator));
 
-		//printf("%s %d\n", "printing queue", lengthOfQueue(&queue));
 		while(isEmpty(&queue) == false ) {
-			//printf("%s %d\n", "printing queue", lengthOfQueue(&queue));
 			iterator = *(struct HeapNode ***)frontElement(&queue);	
 			if((*iterator)->leftChild != NULL) {
 				struct HeapNode ** leftChild = &(*iterator)->leftChild;
@@ -115,17 +115,43 @@ void bfs(struct HeapNode **element) {
 				struct HeapNode ** rightChild = &(*iterator)->rightChild;
 				insert(&queue, &rightChild, sizeof(rightChild));
 			}
-			printf("%d\n", (*iterator)->data);
+			int row = getRow(nodeCounter);
+			if(row == currentRow) {
+				printf("%d ", (*iterator)->data);
+			} else {
+				printf("\n%s %d\n", "row", row);
+				printf("%d ", (*iterator)->data);
+				currentRow = row;
+			}
+			nodeCounter++;
 			deque(&queue);
 		}
 		freeQueue(&queue);
 	}
-	
+
 }
 
+//Depth first search and deallocation
+
 void freeHeap(struct HeapNode **element) {
-
 	assert(*element != NULL);
+	if((*element)->leftChild != NULL) {
+		freeHeap(&(*element)->leftChild);
+	}
+	if((*element)->rightChild != NULL) {
+		freeHeap(&(*element)->rightChild);
+	}
+	free(*element);
+}
 
+static int getRow(int n) {
 
+	n = n + 1;
+	int row = 0;
+	int result = 1;
+	while(n >= result) {
+		result = result * 2;
+		row++;
+	}
+	return row;
 }
