@@ -19,9 +19,9 @@ int main(int argc, char **argv) {
 	addHeapNode(&root, 2);	
 	addHeapNode(&root, 2);	
 	bfs(&root);
-	//sort(&root);
-	printf("%s %d\n", "size of heap", sizeOfHeap(&root, 0));
+	sort(&root);
+	printf("%s %d\n", "size of heap", sizeOfHeap(root, 0));
 	bfs(&root);
-	freeHeap(&root);
+	freeHeap(root);
 	return 0;
 }

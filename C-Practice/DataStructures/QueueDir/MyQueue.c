@@ -63,6 +63,7 @@ void printQueue(struct node **element) {
 
 void freeQueue(struct node **element) {
 
+	//printf("%s\n", "hereeee");
 	if(*(element) != NULL) {
 		freeQueue(&((*element)->next));
 		free((*element)->data);
@@ -97,8 +98,9 @@ void * frontElement(struct node **element) {
 		if((*element)->next != NULL) {
 			temp = frontElement(&(*element)->next);
 		} else {
-			temp = (*element)->data;
+			temp = ((*element)->data);
 		}
 	} 	
+	//printf("%s %d\n", "returning from top of queue", temp);
 	return temp;
 }

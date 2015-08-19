@@ -7,16 +7,14 @@ typedef enum {
 
 struct HeapNode {
 	int data;
-	struct HeapNode *parent;
 	struct HeapNode *rightChild;
 	struct HeapNode *leftChild;
 };
 void addP();
 void addHeapNode(struct HeapNode **element, int n);
-void freeHeap(struct HeapNode **element);
-int sizeOfHeap(struct HeapNode **element, int n);
+void freeHeap(struct HeapNode *element);
+int sizeOfHeap(struct HeapNode *element, int n);
 void bfs(struct HeapNode **element);
-void freeHeap(struct HeapNode **element);
 void sort(struct HeapNode **element);
 
 #endif
