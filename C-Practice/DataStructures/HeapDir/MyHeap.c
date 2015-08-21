@@ -7,8 +7,15 @@
 static int getRow(int n);
 static void heapify(struct HeapNode **element, int n);
 static void maxHeap(struct HeapNode **element);
+static int sizeOfHeap(struct HeapNode *element, int n);
 static struct HeapNode **getNodeAt(struct HeapNode **element, int i);
 static void swap(struct HeapNode **p, struct HeapNode **c);
+static void unrelateSwap(struct HeapNode **t, struct HeapNode **b);
+
+void createHeap(struct HeapNode **element) {
+	int numOfNodes = heapSize(element);
+	heapify(element, numOfNodes);
+}
 
 void addHeapNode(struct HeapNode **element, int n) {
 	//printf("%s %d\n", "adding ", n);
@@ -96,24 +103,24 @@ static int getRow(int n) {
 	return row;
 }
 
-void freeHeap(struct HeapNode *element) {
+void freeHeap(struct HeapNode **element) {
 	bool heapIsEmpty = false;
-	if((element) == NULL) {
+	if((*element) == NULL) {
 		heapIsEmpty = true;
 	}
 
 	if(heapIsEmpty == false) {
-		if(element->leftChild != NULL) {
-			freeHeap(element->leftChild);
+		if((*element)->leftChild != NULL) {
+			freeHeap(&((*element)->leftChild));
 		}
-		if(element->rightChild != NULL) {
-			freeHeap(element->rightChild);
+		if((*element)->rightChild != NULL) {
+			freeHeap(&((*element)->rightChild));
 		}
-		free(element);
+		free(*element);
 	}
 }
 
-int sizeOfHeap(struct HeapNode *element, int n) {
+static int sizeOfHeap(struct HeapNode *element, int n) {
 	if(element == NULL) {
 		return 0;
 	}
@@ -130,18 +137,74 @@ int sizeOfHeap(struct HeapNode *element, int n) {
 }
 
 void sort(struct HeapNode **element) {
-	int numOfNodes = sizeOfHeap((*element), 0);
+	int numOfNodes = heapSize(element);
 	heapify(element, numOfNodes);
+	int lastIndex = numOfNodes - 1;
+	printf("%s\n", "Sorted list: ");
+	for(int i = lastIndex; i > 0; i--) {
+		//printf("%s\n", "Before");
+		//bfs(element);
+		struct HeapNode **nextBig = getNodeAt(element, 0);
+		struct HeapNode **lastNode = getNodeAt(element, i);
+		printf("%d ",(*nextBig)->data);
+		//printf("%d ",(*lastNode)->data);
+		if((*nextBig)->leftChild == (*lastNode) || (*nextBig)->rightChild ==
+				(*lastNode)) {
+			bool isLeft = false;
+			if((*nextBig)->leftChild == *lastNode) {
+				isLeft = true;
+			}
+			unrelateSwap(nextBig, lastNode);
+			//printf("%s\n", "After");
+			//bfs(element);
+			if(isLeft == true) {
+				free((*nextBig)->leftChild);
+				(*nextBig)->leftChild = NULL;
+			} else {
+				free((*nextBig)->rightChild);
+				(*nextBig)->rightChild = NULL;
+
+			}
+			if((*lastNode) == NULL) {
+				//printf("%s\n", "last node is null");
+			}
+			//printf("%s %d\n", "here dog", (*lastNode)->data);
+			//free((*lastNode));
+			//(*lastNode) = NULL;
+
+		} else {
+			unrelateSwap(nextBig, lastNode);
+			//printf("%s\n", "After");
+			if((*lastNode) == NULL) {
+				//printf("%s\n", "last node is null");
+			}
+			//printf("%s %d\n", "here dog", (*lastNode)->data);
+			//bfs(element);
+			free((*lastNode));
+			(*lastNode) = NULL;
+		}
+		if( i > 1) {
+			maxHeap(nextBig);
+		} else {
+			//maxHeap(nextBig);
+		}
+
+	}
+	struct HeapNode **lastNode = getNodeAt(element, 0);
+	printf("%d ",(*lastNode)->data);
+	free((*lastNode));
+	(*lastNode) = NULL;
+	printf("%c", '\n');
 }
 
 static void heapify(struct HeapNode **element, int n) {
 
 	int highestIndex = n - 1;
 	int counterIndex = (highestIndex - 1) / 2;
-	printf("%s %d\n", "starting index: ", counterIndex);
+	//printf("%s %d\n", "starting index: ", counterIndex);
 	for(int i = counterIndex; i >= 0; i--) {
 		struct HeapNode **current = getNodeAt(element, i);
-		printf("%s %d\n", "max heaping ", (*current)->data);
+		//printf("%s %d\n", "max heaping ", (*current)->data);
 		maxHeap(current);
 	}
 
@@ -162,9 +225,15 @@ void maxHeap(struct HeapNode **element) {
 		int rightChildData = ((*element)->rightChild)->data;
 		if(leftChildData > parentData || rightChildData > parentData) {
 			if(leftChildData >= rightChildData) {
-				swap(element, &((*element)->leftChild));
+				unrelateSwap(element, &((*element)->leftChild));
+				if(((*element)->leftChild)->leftChild != NULL) {
+					maxHeap(&((*element)->leftChild));
+				}
 			} else {
-				swap(element, &((*element)->rightChild));
+				unrelateSwap(element, &((*element)->rightChild));
+				if(((*element)->rightChild)->leftChild != NULL) {
+					maxHeap(&((*element)->rightChild));
+				}
 			}
 		}
 	}
@@ -173,7 +242,10 @@ void maxHeap(struct HeapNode **element) {
 		int parentData = (*element)->data;
 		int leftChildData = ((*element)->leftChild)->data;
 		if(leftChildData > parentData) {
-			swap(element, &((*element)->leftChild));
+			unrelateSwap(element, &((*element)->leftChild));
+			if(((*element)->leftChild)->leftChild != NULL) {
+				maxHeap(&((*element)->leftChild));
+			}
 		}
 	}
 
@@ -211,6 +283,10 @@ static struct HeapNode ** getNodeAt(struct HeapNode **element, int i) {
 }
 
 static void swap(struct HeapNode **p, struct HeapNode **c) {
+
+	assert(*p != NULL);
+	assert(*c != NULL);
+
 	bool validInput = true;
 	bool switchNum = false;
 	if(((*p)->leftChild) != *c && (*p)->rightChild != *c) {
@@ -239,7 +315,7 @@ static void swap(struct HeapNode **p, struct HeapNode **c) {
 			((*p)->rightChild) = origParentRC;
 			((*p)->leftChild)->leftChild = origChildLC;
 			((*p)->leftChild)->rightChild = origChildRC;
-			printf("%s\n", "trying to switch addresses");
+			//printf("%s\n", "trying to switch addresses");
 
 		} else {
 			((*p)->leftChild) = origParentLC;
@@ -249,4 +325,84 @@ static void swap(struct HeapNode **p, struct HeapNode **c) {
 		}
 		
 	}
+}
+
+static void unrelateSwap(struct HeapNode **t, struct HeapNode **b) {
+
+	assert(*t != NULL);
+	assert(*b != NULL);
+	struct HeapNode *origTopLC = (*t)->leftChild;
+	struct HeapNode *origTopRC = (*t)->rightChild;
+	struct HeapNode *origBottomLC = (*b)->leftChild;
+	struct HeapNode *origBottomRC = (*b)->rightChild;
+
+	struct HeapNode *tempAddr = *t;
+
+	bool childParent = false;
+
+	if((*t)->leftChild == (*b) || (*t)->rightChild == (*b)) {
+		childParent = true;
+		//printf("%s\n", "parent child pair");
+	}
+
+	if(childParent == false) {
+		(*t) = (*b);
+		(*t)->leftChild = origTopLC;
+		(*t)->rightChild = origTopRC;
+		(*b) = tempAddr;
+		(*b)->leftChild = origBottomLC;
+		(*b)->rightChild = origBottomRC;
+	} else {
+		//int tempInt = (*t)->data;
+		//(*t)->data = (*b)->data;
+		//(*b)->data = tempInt; 
+
+		bool isLeft = false;
+		if((*t)->leftChild == (*b)) {
+			isLeft = true;
+		}
+		if(isLeft == true) {
+			(*t) = (*b);
+			//(*b) = tempAddr;
+			(*t)->leftChild = tempAddr;
+			//(*b) = (*t)->leftChild;
+			if(*b == NULL) {
+				//printf("%s\n", "got a before  NULL bro");
+			}
+			(*t)->rightChild = origTopRC;
+			//printf("%s\n", "about to try and print here");
+			//printf("%s %d\n", "leaving child with ", (*b)->data);
+			(((*t)->leftChild)->leftChild) = origBottomLC;
+			(((*t)->leftChild)->rightChild) = origBottomRC;
+			if(*b == NULL) {
+				//printf("%s\n", "1 got a NULL bro");
+			}//(*b) = tempAddr;
+			//(*b) = (*t)->leftChild;
+			//printf("%s\n", "got a child parent");
+		} else {
+			(*t) = (*b);
+			(*t)->rightChild = tempAddr;
+			if(*b == NULL) {
+				//printf("%s\n", "got a before NULL bro");
+			}//(*b) = tempAddr;
+			//(*b) = (*t)->rightChild;
+			//printf("%s\n", "about to try and print here");
+			//printf("%s %d\n", "leaving child with ", (*b)->data);
+			if(origBottomLC == NULL) {
+				//printf("%s\n", "got a origTopLC bro");
+			}(*t)->leftChild = origTopLC;
+			(((*t)->rightChild)->leftChild) = origBottomLC;
+			(((*t)->rightChild)->rightChild) = origBottomRC;
+			if(*b == NULL) {
+				//printf("%s\n", "got a NULL bro");
+			}//(*b) = tempAddr;
+			//(*b) = (*t)->rightChild;
+		}
+	}
+
+}
+
+int heapSize(struct HeapNode **element) {
+	int size = sizeOfHeap(*element, 0);
+	return size;
 }
