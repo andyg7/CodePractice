@@ -15,14 +15,21 @@ int main(int argc, char **argv) {
 	FILE *file = fopen(argv[1], "r");
 	char line[1024];
 
+	bool firstRun = true;
+
 	while(fgets(line, 1024, file)) {
+
+		if(firstRun == true) {
+			firstRun = false;
+		} else {
+			printf("%c", '\n');
+		}
 
 		int numOfNums = processInput(line);
 		bool validInput = false;
 		if(numOfNums == -1) {
 			printf("%s\n", "Invalid input");
 		} else {
-			printf("%s\n", "Valid input");
 			printf("%s %s", "Before sorting: ", line);
 			validInput = true;
 			struct HeapNode *heapRoot = NULL;
