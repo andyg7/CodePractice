@@ -23,7 +23,3 @@ int createInt(char c[]) {
 	return i;
 }
 
-char[] makeBinary(int x) {
-
-	return "hey";
-}
