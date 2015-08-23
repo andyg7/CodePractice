@@ -15,6 +15,6 @@ void addHeapNode(struct HeapNode **element, int n);
 void freeHeap(struct HeapNode **element);
 int heapSize(struct HeapNode **element);
 void bfs(struct HeapNode **element);
-void sort(struct HeapNode **element);
-void createHeap(struct HeapNode **element);
+void sort(struct HeapNode **element, int (*f1)(const void *, const void *));
+void createHeap(struct HeapNode **element, int (*f1)(const void *, const void *));
 #endif

@@ -5,16 +5,17 @@
 #include "MyQueue.h"
 
 static int getRow(int n);
-static void heapify(struct HeapNode **element, int n);
-static void maxHeap(struct HeapNode **element);
+static void heapify(struct HeapNode **element, int n, int (*f1)(const void *, const
+void *));
+static void maxHeap(struct HeapNode **element, int (*f1)(const void *, const void *));
 static int sizeOfHeap(struct HeapNode *element, int n);
 static struct HeapNode **getNodeAt(struct HeapNode **element, int i);
 static void swap(struct HeapNode **p, struct HeapNode **c);
 static void unrelateSwap(struct HeapNode **t, struct HeapNode **b);
 
-void createHeap(struct HeapNode **element) {
+void createHeap(struct HeapNode **element, int (*f1)(const void *, const void *)) {
 	int numOfNodes = heapSize(element);
-	heapify(element, numOfNodes);
+	heapify(element, numOfNodes, f1);
 }
 
 void addHeapNode(struct HeapNode **element, int n) {
@@ -133,9 +134,9 @@ static int sizeOfHeap(struct HeapNode *element, int n) {
 	return counter;
 }
 
-void sort(struct HeapNode **element) {
+void sort(struct HeapNode **element, int (*f1)(const void *, const void *)) {
 	int numOfNodes = heapSize(element);
-	heapify(element, numOfNodes);
+	heapify(element, numOfNodes, f1);
 	int lastIndex = numOfNodes - 1;
 	for(int i = lastIndex; i > 0; i--) {
 		struct HeapNode **nextBig = getNodeAt(element, 0);
@@ -163,7 +164,7 @@ void sort(struct HeapNode **element) {
 			(*lastNode) = NULL;
 		}
 		if( i > 1) {
-			maxHeap(nextBig);
+			maxHeap(nextBig, f1);
 		}
 
 	}
@@ -174,18 +175,19 @@ void sort(struct HeapNode **element) {
 	printf("%c", '\n');
 }
 
-static void heapify(struct HeapNode **element, int n) {
+static void heapify(struct HeapNode **element, int n, int (*f1)(const void *, const
+void *)) {
 
 	int highestIndex = n - 1;
 	int counterIndex = (highestIndex - 1) / 2;
 	for(int i = counterIndex; i >= 0; i--) {
 		struct HeapNode **current = getNodeAt(element, i);
-		maxHeap(current);
+		maxHeap(current, f1);
 	}
 
 }
 
-void maxHeap(struct HeapNode **element) {
+void maxHeap(struct HeapNode **element, int (*f1)(const void *, const void *)) {
 
 	assert((*element) != NULL);
 	assert((*element)->leftChild != NULL);
@@ -198,16 +200,19 @@ void maxHeap(struct HeapNode **element) {
 		int parentData = (*element)->data;
 		int leftChildData = ((*element)->leftChild)->data;
 		int rightChildData = ((*element)->rightChild)->data;
-		if(leftChildData > parentData || rightChildData > parentData) {
-			if(leftChildData >= rightChildData) {
+		int compareResultParentLC = f1(&parentData, &leftChildData);
+		int compareResultParentRC = f1(&parentData, &rightChildData);
+		int compareResultLCRC = f1(&leftChildData, &rightChildData);
+		if(compareResultParentLC == -1 || compareResultParentRC == -1) {
+			if(compareResultLCRC != -1) {
 				unrelateSwap(element, &((*element)->leftChild));
 				if(((*element)->leftChild)->leftChild != NULL) {
-					maxHeap(&((*element)->leftChild));
+					maxHeap(&((*element)->leftChild), f1);
 				}
 			} else {
 				unrelateSwap(element, &((*element)->rightChild));
 				if(((*element)->rightChild)->leftChild != NULL) {
-					maxHeap(&((*element)->rightChild));
+					maxHeap(&((*element)->rightChild), f1);
 				}
 			}
 		}
@@ -216,10 +221,13 @@ void maxHeap(struct HeapNode **element) {
 	if(hasRightChild == false) {
 		int parentData = (*element)->data;
 		int leftChildData = ((*element)->leftChild)->data;
-		if(leftChildData > parentData) {
+		int compareResult = f1(&parentData, &leftChildData);
+		//printf("%s %d\n", "printing compare", compareResult);
+		//printf("%d\n", parentData - leftChildData);
+		if(compareResult == -1) {
 			unrelateSwap(element, &((*element)->leftChild));
 			if(((*element)->leftChild)->leftChild != NULL) {
-				maxHeap(&((*element)->leftChild));
+				maxHeap(&((*element)->leftChild), f1);
 			}
 		}
 	}

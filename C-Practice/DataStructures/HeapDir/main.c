@@ -9,6 +9,7 @@ int numOfElements(const char *input);
 int stringToInt(const char * c);
 int processInput(const char * input);
 int sizeOfInput(const char * input);
+int compareInt(const void *v1, const void *v2);
 
 int main(int argc, char **argv) {
 
@@ -42,11 +43,15 @@ int main(int argc, char **argv) {
 				addHeapNode(&heapRoot, currentInt);
 			}
 			printf("%s", "After sorting: ");
-			sort(&heapRoot);
+			int (*f1)(const void *v1, const void *v2);
+			f1 = &compareInt;
+			createHeap(&heapRoot, f1);
+			sort(&heapRoot, f1);
 			freeHeap(&heapRoot);
 		}
 
 	}
+	fclose(file);
 	return 0;
 }
 
@@ -144,4 +149,21 @@ int stringToInt(const char * c) {
 	}
 
 	return result;
+}
+
+int compareInt(const void *v1, const void *v2) {
+
+	int x1 = *(int *)v1;
+	int x2 = *(int *)v2;
+
+	if(x1 > x2) {
+		return 1;
+	}
+
+	if(x1 < x2) {
+		return -1;
+	}
+
+	return 0;
+
 }
