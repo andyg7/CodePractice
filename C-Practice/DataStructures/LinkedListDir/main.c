@@ -10,15 +10,20 @@ int main(int argc, const char * argv[]) {
 		//printf("%s", line);
 
 	}
-	struct node *aList = (struct node *)malloc(sizeof(struct node));
+	struct node *aList;
 	initializeLinkedList(&aList);
 	insertBack(9, &aList);
 	insertBack(61, &aList);
+	insertFront(0, &aList);
+	deleteFront(&aList);
+	insertFront(109, &aList);
+	insertFront(81, &aList);
 	insertBack(1890, &aList);
 	printf("%s\n", "printing list:");
 	printLinkedList(&aList);
 	destroyLinkedList(&aList);	
 
-	return 0;
+	fclose(file);
 
+	return 0;
 }

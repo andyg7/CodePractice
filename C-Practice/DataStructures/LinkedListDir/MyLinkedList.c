@@ -7,14 +7,6 @@ void initializeLinkedList(struct node ** element) {
 
 }
 
-static void printHi() {
-	printf("%s\n", "hi!!!");
-}
-
-void sayHi() {
-	printHi();
-}
-
 static int sizeOfList(struct node **element) {
 
 	int counter = 0;

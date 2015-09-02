@@ -10,7 +10,6 @@ struct node {
 	struct node *next;
 };
 
-void sayHi();
 void initializeLinkedList(struct node ** e);
 int getSize();
 void printFirstElement(struct node **e);
