@@ -9,6 +9,7 @@ int main(int argc, const char * argv[]) {
 		int x = createInt(line);	
 		printf("%d\n", x);
 	}
+	fclose(file);
 	return 0;
 }
 

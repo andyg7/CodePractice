@@ -63,6 +63,7 @@ int main(int argc, const char * argv[]) {
 			}
 		}	
 	}
+	fclose(file);
 	return 0;
 } 
 

@@ -64,6 +64,7 @@ int main(int argc, const char * argv[]) {
 	}
 
 	destroyTree(root);
+	fclose(file);
 	return 0;
 }
 

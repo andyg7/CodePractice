@@ -7,4 +7,4 @@ main.o: main.c
 clean:
 	rm -f *.o main
 .PHONY: all
-call: clean main
+all: clean main

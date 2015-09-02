@@ -37,6 +37,7 @@ typedef int bool;
 		}
 
 	}
+	fclose(file);
 	return 0;
 } 
 

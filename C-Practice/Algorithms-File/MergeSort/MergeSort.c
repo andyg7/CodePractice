@@ -54,6 +54,9 @@ int main(int argc, char *argv[]) {
 			printf("%d %s %d\n", i, ": ", *(sortedList + i));
 		} 
 	}
+	
+	fclose(file);
+
 	return 0;
 }
 

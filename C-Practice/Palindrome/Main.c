@@ -65,8 +65,8 @@ int main(int argc, const char * argv[]) {
 			}		
 			
 		}
-	//	fclose(file);
 	}
+	fclose(file);
 	return 0;
 } 
 

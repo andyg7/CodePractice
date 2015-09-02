@@ -33,7 +33,7 @@ int main(int argc, const char * argv[]) {
 		free(secondString);
 	}
 
-	
+	fclose(file);	
 	
 	return 0;
 }

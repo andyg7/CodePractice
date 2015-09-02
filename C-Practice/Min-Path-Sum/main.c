@@ -72,6 +72,7 @@ int main(int argc, const char * argv[]) {
 		free(arr);
 		free(minPaths);
 	}
+	fclose(file);
 	return 0;
 } 
 
