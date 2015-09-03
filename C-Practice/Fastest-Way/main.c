@@ -14,9 +14,10 @@ int squareRootInt(int x);
 static const int WIDTH = 4;
 static const int HEIGHT = 4;
 
-int unitDistance(char ar[WIDTH][HEIGHT], int x0, int y0, int x1, int y1);
+int unitDistance(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, int x1, int y1);
 void printArray(char ar[WIDTH][HEIGHT]);
-void processInput(const char * line, char ar[WIDTH][HEIGHT]);
+void printIntArray(int ar[WIDTH][HEIGHT]);
+void processInput(const char * line, char ar[WIDTH][HEIGHT],int dr[WIDTH][HEIGHT]);
 
 struct node {
 	struct node * next;
@@ -36,6 +37,7 @@ void deque(struct queue * q);
 void destroyQueue(struct queue * q);
 void destroyNode(struct node * n);
 void printQueue(struct queue * q);
+struct node peek(struct queue * q);
 
 int main(int argc, const char * argv[]) {
 
@@ -45,30 +47,38 @@ int main(int argc, const char * argv[]) {
 		// Do something with the line
 		//printf("%s", line);
 		char inputMatrix[WIDTH][HEIGHT];
-		processInput(line, inputMatrix);
-		//printArray(inputMatrix);
+		int distanceMatrix[WIDTH][HEIGHT];
+		processInput(line, inputMatrix, distanceMatrix);
+		printIntArray(distanceMatrix);
+		//unitDistance(inputMatrix, distanceMatrix, 0, 0, 3, 3);
 	}
 
 
-	struct queue myQueue;
+	/*struct queue myQueue;
 	initializeQueue(&myQueue);
+	enqueue(&myQueue, 0, 0, 8);
 	enqueue(&myQueue, 0, 0, 2);
 	enqueue(&myQueue, 0, 0, 8);
-	enqueue(&myQueue, 0, 0, 8);
 	enqueue(&myQueue, 0, 0, 0);
+	struct node tn = peek(&myQueue);
+	printf("%s %d\n","peeking: ", tn.data);
+	printQueue(&myQueue);
 	deque(&myQueue);
-	deque(&myQueue);
-	deque(&myQueue);
+	printf("%s\n", "here");
 	enqueue(&myQueue, 0, 0, 90);
 	enqueue(&myQueue, 0, 0, 10);
+	struct node sn = peek(&myQueue);
+	printf("%s %d\n","peeking: ", sn.data);
+	deque(&myQueue);
+	deque(&myQueue);
 	printQueue(&myQueue);
-	destroyQueue(&myQueue);
+	destroyQueue(&myQueue);*/
 
 	fclose(file);
 	return 0;
 }
 
-
+//
 bool validIndex(int x, int y, int dw, int dh) {
 
 	if(x < 0) {
@@ -137,7 +147,7 @@ int squareRootInt(int x) {
 	return counter;
 }
 
-void processInput(const char * line, char ar[WIDTH][HEIGHT]) {
+void processInput(const char * line, char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT]) {
 
 	for(int i = 0; i < 4; i++) {
 		int counter = ((HEIGHT - 1) * (HEIGHT - 1));
@@ -170,6 +180,14 @@ void processInput(const char * line, char ar[WIDTH][HEIGHT]) {
 		char tempChar = *(line + i); 
 		ar[x][y] = tempChar;
 	}
+
+	for(int i = 0; i < WIDTH; i++) {
+
+		for(int k = 0; k < HEIGHT; k++) {
+			dr[i][k] = -1;			 
+		}
+
+	}
 }
 
 void printArray(char ar[WIDTH][HEIGHT]) {
@@ -185,9 +203,79 @@ void printArray(char ar[WIDTH][HEIGHT]) {
 	}
 }
 
-int unitDistance(char ar[WIDTH][HEIGHT], int x0, int y0, int x1, int y1) {
+void printIntArray(int ar[WIDTH][HEIGHT]) {
 
-	
+	printf("%s\n", "Printing Array: ");
+
+	for(int i = HEIGHT - 1; i >= 0; i--) { 
+
+		for(int k = 0; k < WIDTH; k++) {
+			printf("%d ", ar[k][i]);
+		}
+		printf("%c", '\n');
+	}
+}
+
+int unitDistance(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, int x1, int y1) {
+
+	//printf("%s\n", "getting distance");
+	bool validPoint = validIndex(x0, y0, WIDTH, HEIGHT);
+	if(validPoint == true) {
+		struct queue q;
+		initializeQueue(&q);
+		enqueue(&q, x0, y0, 0);
+
+		while(q.size > 0) {
+
+			printf("%s", "looping");
+			struct node temp = peek(&q);
+			int currentDistance = temp.data;
+			int newDistance = currentDistance + 1;
+			int currentX = temp.x;
+			int currentY = temp.y;
+
+
+			int upperX = currentX;
+			int upperY = currentY + 1;
+			if(validIndex(upperX, upperY, WIDTH, HEIGHT)) {
+				if(dr[upperX][upperY] != -1) {
+					enqueue(&q, upperX, upperY, newDistance);
+				}
+			}
+
+			int rightX = currentX + 1;
+			int rightY = currentY;
+			if(validIndex(rightX, rightY, WIDTH, HEIGHT)) {
+				if(dr[rightX][rightY] != -1) {
+					enqueue(&q, rightX, rightY, newDistance);
+				}
+			}
+
+			int leftX = currentX - 1;
+			int leftY = currentY;
+			if(validIndex(leftX, leftY, WIDTH, HEIGHT)) {
+				if(dr[leftX][leftY] != -1) {
+					enqueue(&q, leftX, leftY, newDistance);
+				}
+			}
+
+			int lowerX = currentX;
+			int lowerY = currentY - 1;
+			if(validIndex(lowerX, lowerY, WIDTH, HEIGHT)) {
+				if(dr[lowerX][lowerY] != -1) {
+					enqueue(&q, lowerX, lowerY, newDistance);
+				}
+			}		
+
+			deque(&q);
+
+		}
+
+		destroyQueue(&q);
+	} else {
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -228,11 +316,19 @@ void enqueue(struct queue * q, int x, int y, int data) {
 void deque(struct queue * q) {
 
 	if(q->tail != NULL) {
-		struct node * temp = q->tail;
-		struct node * next = temp->next;
-		free(temp);
-		q->tail = next;
-		q->size = q->size - 1;
+		struct node * iterator = q->tail;
+		if(iterator->next == NULL) {
+			free(iterator);
+			q->tail = NULL;
+			q->size = q->size - 1;
+		} else {
+			while((iterator->next)->next != NULL) {
+				iterator = iterator->next;
+			}
+			free(iterator->next);
+			iterator->next = NULL;
+			q->size = q->size - 1;
+		}
 	}
 }
 
@@ -260,4 +356,24 @@ void printQueue(struct queue * q) {
 		iterator = iterator->next;
 	}
 	printf("%c", '\n');
+}
+
+struct node peek(struct queue * q) {
+	
+	if(q->tail == NULL) {
+		struct node temp;
+		temp.x = -1;
+		temp.y = -1;
+		temp.data = -1;
+		temp.next = NULL;
+		return temp;
+	} else {
+		struct node * iterator = q->tail;
+		//int size = q->size;
+		while(iterator->next != NULL) {
+			iterator = iterator->next;
+		}
+		struct node temp = *iterator;
+		return temp;
+	}
 }
