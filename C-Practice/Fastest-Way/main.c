@@ -13,6 +13,7 @@ int squareRootInt(int x);
 static const int WIDTH = 4;
 static const int HEIGHT = 4;
 
+void printArray(char ar[WIDTH][HEIGHT]);
 void processInput(const char * line, char ar[WIDTH][HEIGHT]);
 
 
@@ -23,17 +24,11 @@ int main(int argc, const char * argv[]) {
 	while(fgets(line, 1024, file)) {
 		// Do something with the line
 		printf("%s", line);
+		char inputMatrix[WIDTH][HEIGHT];
+		processInput(line, inputMatrix);
+		printArray(inputMatrix);
 	}
 
-	for(int i = 0; i < 25; i++) {
-		int t = getXBFS(i, WIDTH, HEIGHT);
-		int ty = getYBFS(i, WIDTH, HEIGHT);
-		printf("%d %d\n", t, ty);
-	}
-
-	char inputMatrix[WIDTH][HEIGHT];
-	processInput(line, inputMatrix);
-	
 	fclose(file);
 	return 0;
 }
@@ -110,41 +105,48 @@ int squareRootInt(int x) {
 void processInput(const char * line, char ar[WIDTH][HEIGHT]) {
 	int numOfElements = WIDTH * HEIGHT;
 
-	for(int i = 0; i < numOfElements; i++) {
-		int counter = 0;
-		int x = getXBFS(counter, WIDTH, HEIGHT);
-		int y = getYBFS(counter, WIDTH, HEIGHT);
-	}
-
 	for(int i = 0; i < 4; i++) {
-		int counter = ((HEIGHT - 1) * (HEIGHT - 1)) + i;
-		int x = getXBFS(counter, WIDTH, HEIGHT);
+		int counter = ((HEIGHT - 1) * (HEIGHT - 1));
 		int y = getYBFS(counter, WIDTH, HEIGHT);
+		int x = i;
 		char tempChar = *(line + i); 
 		ar[x][y] = tempChar;
-	}
+			}
 
 	for(int i = 7; i < 11; i++) {
-		int counter = ((HEIGHT - 1) * (HEIGHT - 1)) + i;
-		int x = getXBFS(counter, WIDTH, HEIGHT);
+		int counter = ((HEIGHT - 2) * (HEIGHT - 2));
 		int y = getYBFS(counter, WIDTH, HEIGHT);
+		int x = i - 7;
 		char tempChar = *(line + i); 
 		ar[x][y] = tempChar;
 	}
 
-	for(int i = 10; i < 14; i++) {
-		int counter = ((HEIGHT - 1) * (HEIGHT - 1)) + i;
-		int x = getXBFS(counter, WIDTH, HEIGHT);
+	for(int i = 14; i < 18; i++) {
+		int counter = ((HEIGHT - 3) * (HEIGHT - 3));
 		int y = getYBFS(counter, WIDTH, HEIGHT);
+		int x = i - 14;
 		char tempChar = *(line + i); 
 		ar[x][y] = tempChar;
 	}
 
-	for(int i = 13; i < 17; i++) {
-		int counter = ((HEIGHT - 1) * (HEIGHT - 1)) + i;
-		int x = getXBFS(counter, WIDTH, HEIGHT);
+	for(int i = 21; i < 25; i++) {
+		int counter = ((HEIGHT - 4) * (HEIGHT - 4));
 		int y = getYBFS(counter, WIDTH, HEIGHT);
+		int x = i - 21;
 		char tempChar = *(line + i); 
 		ar[x][y] = tempChar;
+	}
+}
+
+void printArray(char ar[WIDTH][HEIGHT]) {
+
+	printf("%s\n", "Printing Array: ");
+
+	for(int i = HEIGHT - 1; i >= 0; i--) { 
+
+		for(int k = 0; k < WIDTH; k++) {
+			printf("%c ", ar[k][i]);
+		}
+		printf("%c", '\n');
 	}
 }
