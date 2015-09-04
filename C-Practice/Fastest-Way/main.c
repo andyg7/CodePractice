@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 typedef int bool;
 #define true 1
 #define false 0
@@ -11,17 +12,25 @@ bool validIndex(int x, int y, int dx, int dy);
 int getXBFS(int counter, int dx, int dy);
 int getYBFS(int counter, int dx, int dy);
 int squareRootInt(int x);
-static const int WIDTH = 4;
-static const int HEIGHT = 4;
+int getMatrixDim(const char *line);
+static int WIDTH = 0;
+static int HEIGHT = 0;
 static const char emptyCell = '*';
 static const char port = 'P';
+static const char start = 'S';
+static const char finish = 'F';
+static const char mountain = '^';
 bool isEmptyCell(char ar[WIDTH][HEIGHT], int x0, int y0, const char c);
 void getPortLocations(char ar[WIDTH][HEIGHT], int *pt, const char c);
+void getLocation(char ar[WIDTH][HEIGHT], int *pt, const char c);
 
 int unitDistance(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, int x1, int y1);
+int getSeaTime(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, int x1, int y1, int p0x, int p0y, int p1x, int p1y);
+int getLandTime(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, int x1, int y1);
+
 void printArray(char ar[WIDTH][HEIGHT]);
 void printIntArray(int ar[WIDTH][HEIGHT]);
-void processInput(const char * line, char ar[WIDTH][HEIGHT],int dr[WIDTH][HEIGHT]);
+void processInput(char * line, char ar[WIDTH][HEIGHT],int dr[WIDTH][HEIGHT]);
 
 struct node {
 	struct node * next;
@@ -50,28 +59,55 @@ int main(int argc, const char * argv[]) {
 	bool firstRun = true;
 	while(fgets(line, 1024, file)) {
 		// Do something with the line
-		//printf("%s", line);
 		if(firstRun == true) {
 			firstRun = false;
 		} else {
 			printf("%c", '\n');
 		}
+		WIDTH = getMatrixDim(line);
+		HEIGHT = getMatrixDim(line);
 		char inputMatrix[WIDTH][HEIGHT];
 		int distanceMatrix[WIDTH][HEIGHT];
 		processInput(line, inputMatrix, distanceMatrix);
 		int * portLocations = (int *)malloc(4 * sizeof(int));
 		getPortLocations(inputMatrix, portLocations, port);
-		for(int i = 0; i < 4; i++) {
-			printf("%d ", *(portLocations + i));
+		int * startLocation = (int *)malloc(2 * sizeof(int));
+		getLocation(inputMatrix, startLocation, start);
+		int * finishLocation = (int *)malloc(2 * sizeof(int));
+		getLocation(inputMatrix, finishLocation, finish);
+		int startingX = *(startLocation);
+		int startingY = *(startLocation + 1);
+		int destinationX = *(finishLocation);
+		int destinationY = *(finishLocation + 1);
+		int port1X = *(portLocations);
+		int port1Y = *(portLocations + 1);
+		int port2X = *(portLocations + 2);
+		int port2Y = *(portLocations + 3);
+
+		int seaTime1 = getSeaTime(inputMatrix, distanceMatrix, startingX, startingY, destinationX, destinationY, port1X, port1Y, port2X, port2Y);
+
+		int seaTime2 = getSeaTime(inputMatrix, distanceMatrix, startingX, startingY, destinationX, destinationY, port2X, port2Y, port1X, port1Y);
+
+
+		int landTime = getLandTime(inputMatrix, distanceMatrix, startingX, startingY, destinationX,
+		destinationY);
+
+		if(seaTime1 < seaTime2) {
+			if(seaTime1 < landTime) {
+				printf("%d", seaTime1);
+			} else {
+				printf("%d", landTime);
+			}
+		} else {
+			if(seaTime2 < landTime) {
+				printf("%d", seaTime2);
+			} else {
+				printf("%d", landTime);
+			}
 		}
-		printf("%c", '\n');
-		printIntArray(distanceMatrix);
-		printf("%s\n", "input: ");
-		printArray(inputMatrix);
-		int testDis = unitDistance(inputMatrix, distanceMatrix, 0, 0, 3, 3);
-		printf("%s %d\n", "test dis: ", testDis);
-		printIntArray(distanceMatrix);
 		free(portLocations);
+		free(startLocation);
+		free(finishLocation);
 	}
 
 	fclose(file);
@@ -146,42 +182,25 @@ int squareRootInt(int x) {
 	return counter;
 }
 
-void processInput(const char * line, char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT]) {
+void processInput(char * line, char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT]) {
 
-	for(int i = 0; i < 4; i++) {
-		int counter = ((HEIGHT - 1) * (HEIGHT - 1));
-		int y = getYBFS(counter, WIDTH, HEIGHT);
-		int x = i;
-		char tempChar = *(line + i); 
-		ar[x][y] = tempChar;
-	}
 
-	for(int i = 7; i < 11; i++) {
-		int counter = ((HEIGHT - 2) * (HEIGHT - 2));
-		int y = getYBFS(counter, WIDTH, HEIGHT);
-		int x = i - 7;
-		char tempChar = *(line + i); 
-		ar[x][y] = tempChar;
-	}
+	int row = WIDTH - 1;
 
-	for(int i = 14; i < 18; i++) {
-		int counter = ((HEIGHT - 3) * (HEIGHT - 3));
-		int y = getYBFS(counter, WIDTH, HEIGHT);
-		int x = i - 14;
-		char tempChar = *(line + i); 
-		ar[x][y] = tempChar;
-	}
+	char delim[4] = {' ', '|', ' '};
+	char * token = strtok(line, delim);
 
-	for(int i = 21; i < 25; i++) {
-		int counter = ((HEIGHT - 4) * (HEIGHT - 4));
-		int y = getYBFS(counter, WIDTH, HEIGHT);
-		int x = i - 21;
-		char tempChar = *(line + i); 
-		ar[x][y] = tempChar;
+	while(token != NULL) {
+		//printf("%s\n", token);	
+		for(int i = 0; i < WIDTH; i++) {
+			 char temp = *(token + i);
+			 ar[i][row] = temp;
+		}
+		row--;
+		token = strtok(NULL, delim);
 	}
 
 	for(int i = 0; i < WIDTH; i++) {
-
 		for(int k = 0; k < HEIGHT; k++) {
 			dr[i][k] = -1;			 
 		}
@@ -247,7 +266,8 @@ int unitDistance(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, 
 				atDestination = true;
 				distance = newDistance;
 			} else {
-				if(validIndex(upperX, upperY, WIDTH, HEIGHT) == true && isEmptyCell(ar, upperX, upperY, emptyCell) == true) {
+				if(validIndex(upperX, upperY, WIDTH, HEIGHT) == true && isEmptyCell(ar, upperX,
+					upperY, emptyCell) == true) {
 					if(dr[upperX][upperY] == -1) {
 						enqueue(&q, upperX, upperY, newDistance);
 						dr[upperX][upperY] = newDistance;
@@ -262,7 +282,8 @@ int unitDistance(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, 
 				atDestination = true;
 				distance = newDistance;
 			} else {
-				if(validIndex(rightX, rightY, WIDTH, HEIGHT) == true && isEmptyCell(ar, rightX, rightY, emptyCell) == true) {
+				if(validIndex(rightX, rightY, WIDTH, HEIGHT) == true && isEmptyCell(ar, rightX,
+					rightY, emptyCell) == true) {
 					if(dr[rightX][rightY] == -1) {
 						enqueue(&q, rightX, rightY, newDistance);
 						dr[rightX][rightY] = newDistance;
@@ -305,11 +326,20 @@ int unitDistance(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, 
 		}
 
 		destroyQueue(&q);
+		for(int i = 0; i < WIDTH; i++) {
+			for(int k = 0; k < HEIGHT; k++) {
+				dr[i][k] = -1;			 
+			}
 
+	}
+
+		if(atDestination == false) {
+			distance = -1;
+		}
 	} else {
 		return -1;
 	}
-
+	
 	return distance;
 }
 
@@ -403,7 +433,6 @@ struct node peek(struct queue * q) {
 		return temp;
 	} else {
 		struct node * iterator = q->tail;
-		//int size = q->size;
 		while(iterator->next != NULL) {
 			iterator = iterator->next;
 		}
@@ -414,7 +443,7 @@ struct node peek(struct queue * q) {
 
 bool isEmptyCell(char ar[WIDTH][HEIGHT], int x0, int y0, const char c) {
 
-	if(ar[x0][y0] == c) {
+	if(ar[x0][y0] == c || ar[x0][y0] == 'P') {
 		return true;
 	} else {
 		return false;
@@ -427,7 +456,6 @@ void getPortLocations(char ar[WIDTH][HEIGHT], int * ptr, const char c) {
 	for(int i = 0; i < HEIGHT; i++) {
 		for(int k = 0; k < WIDTH; k++) {
 			if(ar[i][k] == c) {
-				printf("%s\n", "got match");
 				*(ptr + counter) = i;
 				counter++;
 				*(ptr + counter) = k;
@@ -437,4 +465,80 @@ void getPortLocations(char ar[WIDTH][HEIGHT], int * ptr, const char c) {
 
 	}
 
+}
+
+int getSeaTime(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0,
+		int x1, int y1, int p0x, int p0y, int p1x, int p1y) {
+
+	int startingX = x0;
+	int startingY = y0;
+
+	int destinationX = x1;
+	int destinationY = y1;
+
+	int port1X = p0x;
+	int port1Y = p0y;
+
+	int port2X = p1x;
+	int port2Y = p1y;
+
+	const int landMultiplier = 2;
+	const int seaMultiplier = 1;
+	const int timeToBoard = 1;
+
+	int timeToPort1 = (unitDistance(ar, dr, startingX, startingY, port1X,
+	port1Y) * landMultiplier);
+	//printf("%s %d", "time to port1:", timeToPort1);
+
+	int timeAtPort1 = timeToBoard;
+	//printf("%s %d", "time at port 1: ", timeAtPort1);
+
+	int timePort1ToPort2 = (unitDistance(ar, dr, port1X, port1Y, port2X,
+	port2Y) * seaMultiplier);
+	//printf("%s %d", "time p1 to p2: ", timePort1ToPort2); 
+
+	int timeAtPort2 = timeToBoard;
+	//printf("%s %d", "time at port 2: ", timeAtPort2);
+
+	int port2ToDes = (unitDistance(ar, dr, port2X, port2Y, destinationX,
+	destinationY) * landMultiplier);
+	//printf("%s %d", "time port2 to des: ", port2ToDes); 
+
+	int totalTime = timeToPort1 + timeAtPort1 + timePort1ToPort2 +
+	timeAtPort2 + port2ToDes;
+	//printf("%s %d", "total time: ", totalTime);	
+
+	return totalTime;
+}
+
+void getLocation(char ar[WIDTH][HEIGHT], int *pt, const char c) {
+	for(int i = 0; i < WIDTH; i++) { 
+		for(int k = 0; k < HEIGHT; k++) {
+			if(ar[i][k] == c) {
+				*(pt) = i;
+				*(pt + 1) = k;
+			}
+		}
+	}
+}
+
+int getLandTime(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, int x1, int y1) {
+
+	int startingX = x0;
+	int startingY = y0;
+	int destinationX = x1;
+	int destinationY = y1;
+	int landMultiplier = 2;
+	int time = (unitDistance(ar, dr, startingX, startingY, destinationX, destinationY) * landMultiplier);
+
+	return time;
+
+}
+
+int getMatrixDim(const char *line) {
+	int counter = 0;
+	while(*(line + counter) != ' ') {
+		counter++;
+	}
+	return counter;
 }
