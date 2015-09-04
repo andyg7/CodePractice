@@ -13,6 +13,10 @@ int getYBFS(int counter, int dx, int dy);
 int squareRootInt(int x);
 static const int WIDTH = 4;
 static const int HEIGHT = 4;
+static const char emptyCell = '*';
+static const char port = 'P';
+bool isEmptyCell(char ar[WIDTH][HEIGHT], int x0, int y0, const char c);
+void getPortLocations(char ar[WIDTH][HEIGHT], int *pt, const char c);
 
 int unitDistance(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, int x1, int y1);
 void printArray(char ar[WIDTH][HEIGHT]);
@@ -43,42 +47,37 @@ int main(int argc, const char * argv[]) {
 
 	FILE *file = fopen(argv[1], "r");
 	char line[1024];
+	bool firstRun = true;
 	while(fgets(line, 1024, file)) {
 		// Do something with the line
 		//printf("%s", line);
+		if(firstRun == true) {
+			firstRun = false;
+		} else {
+			printf("%c", '\n');
+		}
 		char inputMatrix[WIDTH][HEIGHT];
 		int distanceMatrix[WIDTH][HEIGHT];
 		processInput(line, inputMatrix, distanceMatrix);
+		int * portLocations = (int *)malloc(4 * sizeof(int));
+		getPortLocations(inputMatrix, portLocations, port);
+		for(int i = 0; i < 4; i++) {
+			printf("%d ", *(portLocations + i));
+		}
+		printf("%c", '\n');
 		printIntArray(distanceMatrix);
-		//unitDistance(inputMatrix, distanceMatrix, 0, 0, 3, 3);
+		printf("%s\n", "input: ");
+		printArray(inputMatrix);
+		int testDis = unitDistance(inputMatrix, distanceMatrix, 0, 0, 3, 3);
+		printf("%s %d\n", "test dis: ", testDis);
+		printIntArray(distanceMatrix);
+		free(portLocations);
 	}
-
-
-	/*struct queue myQueue;
-	initializeQueue(&myQueue);
-	enqueue(&myQueue, 0, 0, 8);
-	enqueue(&myQueue, 0, 0, 2);
-	enqueue(&myQueue, 0, 0, 8);
-	enqueue(&myQueue, 0, 0, 0);
-	struct node tn = peek(&myQueue);
-	printf("%s %d\n","peeking: ", tn.data);
-	printQueue(&myQueue);
-	deque(&myQueue);
-	printf("%s\n", "here");
-	enqueue(&myQueue, 0, 0, 90);
-	enqueue(&myQueue, 0, 0, 10);
-	struct node sn = peek(&myQueue);
-	printf("%s %d\n","peeking: ", sn.data);
-	deque(&myQueue);
-	deque(&myQueue);
-	printQueue(&myQueue);
-	destroyQueue(&myQueue);*/
 
 	fclose(file);
 	return 0;
 }
 
-//
 bool validIndex(int x, int y, int dw, int dh) {
 
 	if(x < 0) {
@@ -155,7 +154,7 @@ void processInput(const char * line, char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGH
 		int x = i;
 		char tempChar = *(line + i); 
 		ar[x][y] = tempChar;
-			}
+	}
 
 	for(int i = 7; i < 11; i++) {
 		int counter = ((HEIGHT - 2) * (HEIGHT - 2));
@@ -218,16 +217,23 @@ void printIntArray(int ar[WIDTH][HEIGHT]) {
 
 int unitDistance(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, int x1, int y1) {
 
-	//printf("%s\n", "getting distance");
+	int distance = 0;
+	int destinationX = x1;
+	int destinationY = y1;
+
 	bool validPoint = validIndex(x0, y0, WIDTH, HEIGHT);
-	if(validPoint == true) {
+	bool validDestination = validIndex(destinationX, destinationY, WIDTH,
+	HEIGHT);
+	if(validPoint == true && validDestination) {
 		struct queue q;
 		initializeQueue(&q);
-		enqueue(&q, x0, y0, 0);
+		const int startingDistance = 0;
+		enqueue(&q, x0, y0, startingDistance);
+		dr[0][0] = 0;
+		bool atDestination = false;
 
-		while(q.size > 0) {
+		while(q.size > 0 && atDestination == false) {
 
-			printf("%s", "looping");
 			struct node temp = peek(&q);
 			int currentDistance = temp.data;
 			int newDistance = currentDistance + 1;
@@ -237,46 +243,74 @@ int unitDistance(char ar[WIDTH][HEIGHT], int dr[WIDTH][HEIGHT], int x0, int y0, 
 
 			int upperX = currentX;
 			int upperY = currentY + 1;
-			if(validIndex(upperX, upperY, WIDTH, HEIGHT)) {
-				if(dr[upperX][upperY] != -1) {
-					enqueue(&q, upperX, upperY, newDistance);
+			if(upperX == destinationX && upperY == destinationY) {
+				atDestination = true;
+				distance = newDistance;
+			} else {
+				if(validIndex(upperX, upperY, WIDTH, HEIGHT) == true && isEmptyCell(ar, upperX, upperY, emptyCell) == true) {
+					if(dr[upperX][upperY] == -1) {
+						enqueue(&q, upperX, upperY, newDistance);
+						dr[upperX][upperY] = newDistance;
+					}
 				}
 			}
+
 
 			int rightX = currentX + 1;
 			int rightY = currentY;
-			if(validIndex(rightX, rightY, WIDTH, HEIGHT)) {
-				if(dr[rightX][rightY] != -1) {
-					enqueue(&q, rightX, rightY, newDistance);
+			if(rightX == destinationX && rightY == destinationY) {
+				atDestination = true;
+				distance = newDistance;
+			} else {
+				if(validIndex(rightX, rightY, WIDTH, HEIGHT) == true && isEmptyCell(ar, rightX, rightY, emptyCell) == true) {
+					if(dr[rightX][rightY] == -1) {
+						enqueue(&q, rightX, rightY, newDistance);
+						dr[rightX][rightY] = newDistance;
+					}
 				}
 			}
+
 
 			int leftX = currentX - 1;
 			int leftY = currentY;
-			if(validIndex(leftX, leftY, WIDTH, HEIGHT)) {
-				if(dr[leftX][leftY] != -1) {
-					enqueue(&q, leftX, leftY, newDistance);
-				}
-			}
+			if(leftX == destinationX && leftY == destinationY) {
+				atDestination = true;
+				distance = newDistance;
+			} else {
+				if(validIndex(leftX, leftY, WIDTH, HEIGHT) == true &&
+						isEmptyCell(ar, leftX, leftY, emptyCell) == true) {
+					if(dr[leftX][leftY] == -1) {
+						enqueue(&q, leftX, leftY, newDistance);
+						dr[leftX][leftY] = newDistance;
+					}
+				}	}
+
 
 			int lowerX = currentX;
 			int lowerY = currentY - 1;
-			if(validIndex(lowerX, lowerY, WIDTH, HEIGHT)) {
-				if(dr[lowerX][lowerY] != -1) {
-					enqueue(&q, lowerX, lowerY, newDistance);
+			if(lowerX == destinationX && lowerY == destinationY) {
+				atDestination = true;
+				distance = newDistance;
+			} else {
+				if(validIndex(lowerX, lowerY, WIDTH, HEIGHT) == true
+						&& isEmptyCell(ar, lowerX, lowerY, emptyCell) == true) {
+					if(dr[lowerX][lowerY] == -1) {
+						enqueue(&q, lowerX, lowerY, newDistance);
+						dr[lowerX][lowerY] = newDistance;
+					}
 				}
-			}		
+			}
 
 			deque(&q);
-
 		}
 
 		destroyQueue(&q);
+
 	} else {
 		return -1;
 	}
 
-	return 0;
+	return distance;
 }
 
 
@@ -297,7 +331,7 @@ void enqueue(struct queue * q, int x, int y, int data) {
 		tempNode->next = NULL;
 		q->tail = tempNode;
 		q->size = (q->size) + 1;
-		
+
 	} else {
 		struct node * tempNext = q->tail;
 
@@ -359,7 +393,7 @@ void printQueue(struct queue * q) {
 }
 
 struct node peek(struct queue * q) {
-	
+
 	if(q->tail == NULL) {
 		struct node temp;
 		temp.x = -1;
@@ -376,4 +410,31 @@ struct node peek(struct queue * q) {
 		struct node temp = *iterator;
 		return temp;
 	}
+}
+
+bool isEmptyCell(char ar[WIDTH][HEIGHT], int x0, int y0, const char c) {
+
+	if(ar[x0][y0] == c) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+void getPortLocations(char ar[WIDTH][HEIGHT], int * ptr, const char c) {
+
+	int counter = 0;
+	for(int i = 0; i < HEIGHT; i++) {
+		for(int k = 0; k < WIDTH; k++) {
+			if(ar[i][k] == c) {
+				printf("%s\n", "got match");
+				*(ptr + counter) = i;
+				counter++;
+				*(ptr + counter) = k;
+				counter++;
+			}
+		}
+
+	}
+
 }
