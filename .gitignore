@@ -3,3 +3,5 @@ C-Practice/DataStructures/Hash-Table/test.txt
 *.class
 *.swp
 .DS_Store
+main
+a.out
