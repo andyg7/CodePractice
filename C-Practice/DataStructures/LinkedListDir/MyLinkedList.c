@@ -1,10 +1,12 @@
 #include "MyLinkedList.h"
+#include "mytest.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+static int tesss = 13;
+int ant = 2;
 void initializeLinkedList(struct node ** element) {
 	*element = NULL;
-
+	ant = 10;
 }
 
 static int sizeOfList(struct node **element) {

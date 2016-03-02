@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "mytest.h"
 #include "MyLinkedList.h"
-
 int main(int argc, const char * argv[]) {
 
 	FILE *file = fopen(argv[1], "r");
@@ -22,8 +22,11 @@ int main(int argc, const char * argv[]) {
 	printf("%s\n", "printing list:");
 	printLinkedList(&aList);
 	destroyLinkedList(&aList);	
-
+	printf("got %d\n", ant);
+	
 	fclose(file);
-
+#ifndef _MY_MYTEST_H_
+	printf("defining");
+#endif
 	return 0;
 }

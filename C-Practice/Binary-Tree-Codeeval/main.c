@@ -18,8 +18,8 @@ void emptyArrays();
 struct node * search(int , struct node * leaf);
 void findPath(int index, int n, struct node *leaf);
 
-struct node *root = NULL;
-int firstArry[10];
+	struct node *root = NULL;
+	int firstArry[10];
 int secondArry[10];
 
 int main(int argc, const char * argv[]) {
@@ -27,8 +27,8 @@ int main(int argc, const char * argv[]) {
 	char line[1024];
 
 	/*int n = 10;
-	int * np = (int *)malloc(sizeof(int));
-	np = &n;
+	  int * np = (int *)malloc(sizeof(int));
+	  np = &n;
 	free(np);*/
 
 	createTree(30);

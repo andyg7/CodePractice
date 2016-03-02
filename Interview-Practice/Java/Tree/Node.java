@@ -61,6 +61,11 @@ public class Node<T extends Comparable<T>>
 		}
 	}
 
+	public void setData(T in)
+	{
+		this.data = in;
+	}
+
 	public T getData() 
 	{
 		return data;
